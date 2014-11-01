@@ -9,14 +9,6 @@ db_file = 'newad-notifier.db'
 doc = Nokogiri::HTML(open(url))
 items = doc.xpath("//div[contains(@class,'search_listing_adsBN_section')]/ul/li[contains(@class,'list_adsBN_item')]/div/a[contains(@class,'whole_area_link')]")
 
-# Caso a lista pesquisada seja muito movimentada e entrem mais de 50 anúncios por atualização, serão perdidas várias notificações.
-# Planejamento para esse tipo de problema:
-# 	- Antes de percorrer a lista, pegar o último ID inserido no banco
-# 	- Verificar se esse ID consta na lista atual
-# 	- Caso não conste, sugerir ao usuário refinar a pesquisa
-# Próximos passos:
-#	- Criar um arquivo de configurações e permitir configurar mais de uma URL para notificações
-
 if items.length.zero?
 	puts "Unsupported URL: #{url}"
 else
