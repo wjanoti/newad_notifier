@@ -2,12 +2,15 @@ require 'nokogiri'
 require 'open-uri'
 require 'sqlite3'
 require 'net/smtp'
+require 'yaml'
 
-url = "http://rj.bomnegocio.com/rio-de-janeiro-e-regiao/videogames?q=nintendo+ds"
-db_file = 'newad-notifier.db'
+conf = YAML.load_file('conf.yml')
+
+url = conf['query_url']
+db_file = conf['db_file']
 
 doc = Nokogiri::HTML(open(url))
-items = doc.xpath("//div[contains(@class,'search_listing_adsBN_section')]/ul/li[contains(@class,'list_adsBN_item')]/div/a[contains(@class,'whole_area_link')]")
+items = doc.xpath(conf['xpath_expr'])
 
 if items.length.zero?
 	puts "Unsupported URL: #{url}"
@@ -28,7 +31,7 @@ else
 				[list_id, subject, list_id]
 			)
 			if db.changes > 0
-				ad_url = "http://bomnegocio.com/vi/#{list_id}.html"
+				ad_url = conf['ad_url'] % {:list_id => list_id}
 				new_items.push({
 					:list_id => list_id,
 					:subject => subject,
