@@ -1,0 +1,9 @@
+From: NewAd Notifier <%{sender_email}>
+To: %{recipient_name} <%{recipient_email}>
+Subject: #{new_items.length} new ads! #{current_datetime}
+
+There are #{new_items.length} new ads on the list you are watching:
+
+#{new_items_string}
+
+Link for the entire list: #{url}

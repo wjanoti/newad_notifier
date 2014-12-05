@@ -44,23 +44,18 @@ else
 		else
 			new_items_string = new_items.map { |item| "#{item[:subject]} - #{item[:url]}" }.join("\n")
 			current_datetime = Time.now.strftime "%d/%m/%Y %H:%M"
-			message = <<MESSAGE_END
-From: NewAd Notifier <tsmlima+newad-notifier@gmail.com>
-To: Thiago Salles <tsmlima@gmail.com>
-Subject: #{new_items.length} new ads! #{current_datetime}
+			file = File.open(conf['template_email'])
+			message = file.read % {
+				:sender_email => conf['sender_email'],
+				:recipient_name => conf['recipient_name'],
+				:recipient_email => conf['recipient_email']
+			}
 
-There are #{new_items.length} new ads on the list you are watching:
+puts "------------------------------------"
+puts message
+puts "------------------------------------"
 
-#{new_items_string}
 
-Link for the entire list: #{url}
-MESSAGE_END
-
-			Net::SMTP.start('localhost') do |smtp|
-				smtp.send_message message, 'tsmlima+newad-notifier@gmail.com', 'tsmlima@gmail.com'
-			end
-
-			puts "#{new_items.length} new ads"
 		end
 	rescue SQLite3::Exception => e
 		puts "Database exception occurred: #{e}"
