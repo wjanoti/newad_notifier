@@ -46,15 +46,20 @@ else
 			current_datetime = Time.now.strftime "%d/%m/%Y %H:%M"
 			file = File.open(conf['template_email'])
 			message = file.read % {
+				:current_datetime => current_datetime,
 				:sender_email => conf['sender_email'],
 				:recipient_name => conf['recipient_name'],
-				:recipient_email => conf['recipient_email']
+				:recipient_email => conf['recipient_email'],
+				:number_of_ads => new_items.length,
+				:new_items_string => new_items_string,
+				:query_url => conf['query_url']
 			}
 
-puts "------------------------------------"
-puts message
-puts "------------------------------------"
+			Net::SMTP.start('localhost') do |smtp|
+				smtp.send_message message, conf['sender_email'], conf['recipient_email']
+			end
 
+			puts "#{new_items.length} new ads"
 
 		end
 	rescue SQLite3::Exception => e
