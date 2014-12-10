@@ -1,8 +1,8 @@
 query_url: "http://rj.bomnegocio.com/rio-de-janeiro-e-regiao/computadores-e-acessorios/notebook-e-netbook?q=notebook"
 xpath_expr: "//div[contains(@class,'search_listing_adsBN_section')]/ul/li[contains(@class,'list_adsBN_item')]/div/a[contains(@class,'whole_area_link')]"
-db_file: newad_notifier.db
+db_file: db/newad_notifier.db
 ad_url: "http://bomnegocio.com/vi/%{list_id}.html"
 template_email: templates/newad_notifier.email
-sender_email: "tsmlima+newad-notifier@gmail.com"
-recipient_name: "Thiago Salles"
-recipient_email: "tsmlima@gmail.com"
+sender_email: "naner@naner.com.br"
+recipient_name: "Naner Nunes"
+recipient_email: "naner@naner.com.br"
