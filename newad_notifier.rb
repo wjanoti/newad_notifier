@@ -16,16 +16,12 @@ if items.length.zero?
 	puts "Unsupported URL: #{url}"
 else
 	begin
-		db = SQLite3::Database.open db_file
-		db.execute "CREATE TABLE IF NOT EXISTS ads (
-			id INTEGER PRIMARY KEY,
-			title TEXT,
-			created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-		)"
+		# rake db:migrate
 		new_items = []
 		items.each { |ad_node|
 			list_id = ad_node.attr('name').strip
 			subject = ad_node.attr('title').strip
+			# Ads.first_or_create(:id => 0, :title => '')
 			db.execute(
 				"INSERT INTO ads(id, title) SELECT ?, ?	WHERE NOT EXISTS(SELECT 1 FROM ads WHERE id = ?)",
 				[list_id, subject, list_id]
