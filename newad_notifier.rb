@@ -44,8 +44,7 @@ else
 		else
 			new_items_string = new_items.map { |item| "#{item[:subject]} - #{item[:url]}" }.join("\n")
 			current_datetime = Time.now.strftime "%d/%m/%Y %H:%M"
-			file = File.open(conf['template_email'])
-			message = file.read % {
+			message = File.read(conf['template_email']) % {
 				:current_datetime => current_datetime,
 				:sender_email => conf['sender_email'],
 				:recipient_name => conf['recipient_name'],
