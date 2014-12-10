@@ -19,6 +19,9 @@ Rake.application.init
 Rake.application.load_rakefile
 Rake::Task['db:migrate'].invoke
 
+# Temp...
+class Ad < ActiveRecord::Base; end
+
 conf = YAML.load_file('conf.yml')
 
 url = conf['query_url']
@@ -31,16 +34,11 @@ if items.length.zero?
 	puts "Unsupported URL: #{url}"
 else
 	begin
-		# rake db:migrate
 		new_items = []
 		items.each { |ad_node|
 			list_id = ad_node.attr('name').strip
 			subject = ad_node.attr('title').strip
-			# Ads.first_or_create(:id => 0, :title => '')
-			db.execute(
-				"INSERT INTO ads(id, title) SELECT ?, ?	WHERE NOT EXISTS(SELECT 1 FROM ads WHERE id = ?)",
-				[list_id, subject, list_id]
-			)
+			Ad.create :id => list_id, :title => subject
 			if db.changes > 0
 				ad_url = conf['ad_url'] % {:list_id => list_id}
 				new_items.push({
