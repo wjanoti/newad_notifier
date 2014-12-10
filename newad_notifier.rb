@@ -4,13 +4,15 @@ require 'sqlite3'
 require 'net/smtp'
 require 'yaml'
 
-conf = YAML.load_file('conf.yml')
+database = YAML.load_file('config/database.yml')
+email = YAML.load_file('config/email.yml')
+lists = YAML.load_file('config/lists.yml')
 
-url = conf['query_url']
-db_file = conf['db_file']
+url = lists['query_url']
+db_file = database['file_name']
 
 doc = Nokogiri::HTML(open(url))
-items = doc.xpath(conf['xpath_expr'])
+items = doc.xpath(lists['xpath_expr'])
 
 if items.length.zero?
 	puts "Unsupported URL: #{url}"
@@ -31,7 +33,7 @@ else
 				[list_id, subject, list_id]
 			)
 			if db.changes > 0
-				ad_url = conf['ad_url'] % {:list_id => list_id}
+				ad_url = lists['ad_url'] % {:list_id => list_id}
 				new_items.push({
 					:list_id => list_id,
 					:subject => subject,
@@ -44,18 +46,18 @@ else
 		else
 			new_items_string = new_items.map { |item| "#{item[:subject]} - #{item[:url]}" }.join("\n")
 			current_datetime = Time.now.strftime "%d/%m/%Y %H:%M"
-			message = File.read(conf['template_email']) % {
+			message = File.read(email['template_email']) % {
 				:current_datetime => current_datetime,
-				:sender_email => conf['sender_email'],
-				:recipient_name => conf['recipient_name'],
-				:recipient_email => conf['recipient_email'],
+				:sender_email => email['sender_email'],
+				:recipient_name => email['recipient_name'],
+				:recipient_email => email['recipient_email'],
 				:number_of_ads => new_items.length,
 				:new_items_string => new_items_string,
-				:query_url => conf['query_url']
+				:query_url => lists['query_url']
 			}
 
 			Net::SMTP.start('localhost') do |smtp|
-				smtp.send_message message, conf['sender_email'], conf['recipient_email']
+				smtp.send_message message, email['sender_email'], email['recipient_email']
 			end
 
 			puts "#{new_items.length} new ads"
