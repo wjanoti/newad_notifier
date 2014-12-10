@@ -1,8 +1,23 @@
-require 'nokogiri'
-require 'open-uri'
-require 'sqlite3'
-require 'net/smtp'
+#!/usr/bin/env ruby
+
+require 'rake'
 require 'yaml'
+require 'open-uri'
+require 'net/smtp'
+
+require 'sqlite3'
+require 'active_record'
+require 'nokogiri'
+
+# Establish the database connection
+ActiveRecord::Base.establish_connection(
+  YAML::load( File.open('config/database.yml') )['production']
+)
+
+# Invoke the rake db:migrate
+Rake.application.init
+Rake.application.load_rakefile
+Rake::Task['db:migrate'].invoke
 
 conf = YAML.load_file('conf.yml')
 
