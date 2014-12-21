@@ -1,0 +1,8 @@
+bomnegocio:
+  title: "Bom Negocio"
+  ad_xpath: "//div[contains(@class,'search_listing_adsBN_section')]/ul/li[contains(@class,'list_adsBN_item')]/div/a[contains(@class,'whole_area_link')]"
+  ad_url_pattern: "http://bomnegocio.com/vi/%{id}.html"
+olx:
+  title: "OLX"
+  xpath: "//div[contains(@class,'the-list')]/div[contains(@class,'item')]"
+  ad_url_pattern: "http://www.olx.com.br/iid-%{id}"
