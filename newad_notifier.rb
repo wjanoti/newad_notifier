@@ -23,19 +23,9 @@ Rake::Task['db:migrate'].invoke
 class Ad < ActiveRecord::Base; end
 
 # Laading configuration files
-database  = YAML.load_file('config/database.yml')
 providers = YAML.load_file('config/providers.yml')
 lists     = YAML.load_file('config/lists.yml')
 email     = YAML.load_file('config/email.yml')
-
-# Configuring the database connection
-begin
-	db = SQLite3::Database.open database['file_name']
-rescue SQLite3::Exception => e
-	puts "Database exception occurred: #{e}"
-ensure
-	exit if !db
-end
 
 # Checking the lists
 new_items = []
@@ -73,17 +63,14 @@ lists.each do |list|
 			ad_url = ad_url_pattern % {:id => ad_id}
 
 			# Registering the ad if it's new
-			db.execute(
-				"INSERT INTO ads(id, title) SELECT ?, ?	WHERE NOT EXISTS(SELECT 1 FROM ads WHERE id = ?)",
-				[ad_id, ad_title, ad_id]
-			)
-			if db.changes > 0
-				new_list[:items].push({
-					:id => ad_id,
-					:title => ad_title,
-					:url => ad_url
-				})
-			end
+			Ad.where(:ad_id => ad_id, :title => ad_title).first_or_create
+#if db.changes > 0
+#				new_list[:items].push({
+#					:id => ad_id,
+#					:title => ad_title,
+#					:url => ad_url
+#				})
+#			end
 		}
 	end
 
@@ -117,4 +104,3 @@ else
 end
 
 # Closing the database
-db.close if db
