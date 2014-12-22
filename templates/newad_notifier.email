@@ -5,5 +5,3 @@ Subject: %{number_of_ads} new ads! %{current_datetime}
 There are %{number_of_ads} new ads on the list you are watching:
 
 %{new_items_string}
-
-Link for the entire list: %{query_url}

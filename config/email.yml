@@ -1,0 +1,4 @@
+template_email: "templates/newad_notifier.email"
+sender_email: "tsmlima+newad-notifier@gmail.com"
+recipient_name: "Thiago Salles"
+recipient_email: "tsmlima@gmail.com"
