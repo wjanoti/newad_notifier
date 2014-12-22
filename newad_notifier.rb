@@ -78,15 +78,16 @@ lists.each do |list|
 
 end
 
+new_items_count = new_items.map { |list| list[:items].length }.inject(:+)
+
 # Sending an email if any ad was found
-if new_items.length.zero?
+if new_items_count.zero?
 	puts "No new ads"
 else
 	new_items_string = new_items.map { |list|
 		list_items_string = list[:items].map { |item| "- #{item[:title]} - #{item[:url]}" }.join("\n")
 		"#{list[:title]}\n#{list[:url]}\n\n#{list_items_string}\n"
 	}.join("\n")
-	new_items_count = new_items.map { |list| list[:items].length }.inject(:+)
 	current_datetime = Time.now.strftime "%d/%m/%Y %H:%M"
 	message = File.read(email['template_email']) % {
 		:current_datetime => current_datetime,
