@@ -6,7 +6,7 @@ bomnegocio:
   ad_url_pattern: "http://bomnegocio.com/vi/%{id}.html"
 olx:
   title: "OLX"
-  ad_node_xpath: "//div[contains(@class,'the-list')]/div[contains(@class,'item')]"
+  ad_node_xpath: "//div[@id='itemListContent']/div[contains(@class,'the-list')]/div[contains(@class,'item')]"
   ad_id_xpath: "@data-item-id"
   ad_title_xpath: "a/@title"
   ad_url_pattern: "http://www.olx.com.br/iid-%{id}"
