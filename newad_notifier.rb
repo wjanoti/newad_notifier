@@ -34,12 +34,14 @@ lists.each do |list|
 	list_provider = list['provider']
 	list_url = list['url']
 	list_title = "(#{providers[list_provider]['title']}) #{list['title']}"
-	ad_xpath = providers[list_provider]['ad_xpath']
+	ad_node_xpath = providers[list_provider]['ad_node_xpath']
+	ad_id_xpath = providers[list_provider]['ad_id_xpath']
+	ad_title_xpath = providers[list_provider]['ad_title_xpath']
 	ad_url_pattern = providers[list_provider]['ad_url_pattern']
 
 	# Getting list items from the provider
 	doc = Nokogiri::HTML(open(list_url))
-	items = doc.xpath(ad_xpath)
+	items = doc.xpath(ad_node_xpath)
 
 	# Processing the ads found
 	if items.length.zero?
@@ -57,8 +59,8 @@ lists.each do |list|
 		items.each do |ad_node|
 
 			# Getting ad properties
-			ad_id = ad_node.attr('name').strip #TODO: Configure it on yaml file
-			ad_title = ad_node.attr('title').strip #TODO: Configure it on yaml file
+			ad_id = ad_node.xpath(ad_id_xpath).to_s.strip
+			ad_title = ad_node.xpath(ad_title_xpath).to_s.strip
 			ad_url = ad_url_pattern % {:id => ad_id}
 
 			# Registering the ad if it's new
@@ -75,13 +77,13 @@ lists.each do |list|
 			end
 		end
 
-		if !new_list[:items].length.zero?
-			new_items.push(new_list)
-		end
+		# Including new_list if new ads were found
+		new_items.push(new_list) unless new_list[:items].length.zero?
 	end
 
 end
 
+# Getting the total number of new ads found
 new_items_count = new_items.map { |list| list[:items].length }.inject(:+)
 
 # Sending an email if any ad was found
