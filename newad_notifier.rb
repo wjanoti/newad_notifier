@@ -84,7 +84,7 @@ lists.each do |list|
 end
 
 # Getting the total number of new ads found
-new_items_count = new_items.map { |list| list[:items].length }.inject(:+)
+new_items_count = new_items.map { |list| list[:items].length }.inject(:+).to_i
 
 # Sending an email if any ad was found
 if new_items_count.zero?
