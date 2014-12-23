@@ -47,14 +47,14 @@ lists.each do |list|
 	else
 
 		# Creating container for the current list
-		new_list = new_items.push({
+		new_list = {
 			:title => list_title,
 			:url => list_url,
 			:items => []
-		}).last
+		}
 
 		# Check each ad found
-		items.each { |ad_node|
+		items.each do |ad_node|
 
 			# Getting ad properties
 			ad_id = ad_node.attr('name').strip #TODO: Configure it on yaml file
@@ -73,7 +73,11 @@ lists.each do |list|
 					:url => ad_url
 				})
 			end
-		}
+		end
+
+		if !new_list[:items].length.zero?
+			new_items.push(new_list)
+		end
 	end
 
 end
