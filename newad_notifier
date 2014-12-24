@@ -63,14 +63,11 @@ lists.each do |list|
 			ad_url = ad_url_pattern % {:id => ad_id}
 
 			# Registering the ad if it's new
-			Ad.where(:ad_id => ad_id, :title => ad_title).first_or_create
-#if db.changes > 0
-#				new_list[:items].push({
-#					:id => ad_id,
-#					:title => ad_title,
-#					:url => ad_url
-#				})
-#			end
+			begin
+			  Ad.create( :ad_id => ad_id, :title => ad_title )
+			  new_list[:items].push({ :ad_id => ad_id, :title => ad_title, :url => ad_url })
+			rescue ActiveRecord::RecordNotUnique
+			end
 		}
 	end
 
