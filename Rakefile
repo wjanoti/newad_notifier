@@ -35,12 +35,12 @@ namespace :postfix do
 
   desc "Start a Local Postfix Mail Server"
   task :start do
-    %x[ sudo postfix start ]
+    %x[ sudo postfix start > /dev/null 2>&1 ]
   end
 
   desc "Stop a Local Postfix Mail Server"
   task :stop do
-    %x[ sudo postfix stop ]
+    %x[ sudo postfix stop  > /dev/null 2>&1 ]
   end
 
 end

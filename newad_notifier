@@ -96,6 +96,8 @@ else
 		:new_items_string => new_items_string
 	}
 
+	Rake::Task['postfix:start'].invoke
+
 	Net::SMTP.start('localhost') do |smtp|
 		smtp.send_message message, email['sender_email'], email['recipient_email']
 	end
@@ -103,4 +105,4 @@ else
 	puts "#{new_items_count} new ads"
 end
 
-# Closing the database
+Rake::Task['postfix:stop'].invoke
