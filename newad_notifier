@@ -9,9 +9,15 @@ require 'sqlite3'
 require 'active_record'
 require 'nokogiri'
 
+# Laoding configuration files
+database  = YAML.load_file('config/database.yml')
+providers = YAML.load_file('config/providers.yml')
+lists     = YAML.load_file('config/lists.yml')
+email     = YAML.load_file('config/email.yml')
+
 # Establish the database connection
 ActiveRecord::Base.establish_connection(
-  YAML::load( File.open('config/database.yml') )['production']
+	database['production']
 )
 
 # Invoke the rake db:migrate
@@ -19,13 +25,9 @@ Rake.application.init
 Rake.application.load_rakefile
 Rake::Task['db:migrate'].invoke
 
-# Temp...
-class Ad < ActiveRecord::Base; end
-
-# Laading configuration files
-providers = YAML.load_file('config/providers.yml')
-lists     = YAML.load_file('config/lists.yml')
-email     = YAML.load_file('config/email.yml')
+# Creates the Database references
+Dir.glob( File.join File.dirname(__FILE__),'app','models','**/*.rb' )
+	.sort_by { |file| file.count "/" }.each { |file| require file }
 
 # Checking the lists
 new_items = []
@@ -66,8 +68,15 @@ lists.each do |list|
 
 			# Registering the ad if it's new
 			begin
-			  Ad.create( :ad_id => ad_id, :title => ad_title )
-			  new_list[:items].push({ :ad_id => ad_id, :title => ad_title, :url => ad_url })
+				Ad.create(
+					:ad_id => ad_id,
+					:title => ad_title
+				)
+				new_list[:items].push({
+					:id => ad_id,
+					:title => ad_title,
+					:url => ad_url
+				})
 			rescue ActiveRecord::RecordNotUnique
 			end
 		end
