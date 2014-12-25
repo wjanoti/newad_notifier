@@ -1,7 +1,9 @@
 From: NewAd Notifier <%{sender_email}>
 To: %{recipient_name} <%{recipient_email}>
+MIME-Version: 1.0
+Content-type: text/html
 Subject: %{number_of_ads} new ads! %{current_datetime}
 
-There are %{number_of_ads} new ads on the list you are watching:
-
+There are %{number_of_ads} new ads on the lists you are watching:<br />
+<br />
 %{new_items_string}

@@ -36,16 +36,17 @@ Ad.transaction do
 	lists.each do |list|
 
 		# Getting list properties
-		list_provider = list['provider']
-		list_url = list['url']
-		list_title = "(#{providers[list_provider]['title']}) #{list['title']}"
-		ad_node_xpath = providers[list_provider]['ad_node_xpath']
-		ad_id_xpath = providers[list_provider]['ad_id_xpath']
+		list_provider  = list['provider']
+		list_url       = list['url']
+		list_title     = "(#{providers[list_provider]['title']}) #{list['title']}"
+		ad_node_xpath  = providers[list_provider]['ad_node_xpath']
+		ad_id_xpath    = providers[list_provider]['ad_id_xpath']
 		ad_title_xpath = providers[list_provider]['ad_title_xpath']
+		ad_price_xpath = providers[list_provider]['ad_price_xpath']
 		ad_url_pattern = providers[list_provider]['ad_url_pattern']
 
 		# Getting list items from the provider
-		doc = Nokogiri::HTML(open(list_url))
+		doc   = Nokogiri::HTML(open(list_url))
 		items = doc.xpath(ad_node_xpath)
 
 		# Processing the ads found
@@ -56,7 +57,7 @@ Ad.transaction do
 			# Creating container for the current list
 			new_list = {
 				:title => list_title,
-				:url => list_url,
+				:url   => list_url,
 				:items => []
 			}
 
@@ -64,27 +65,35 @@ Ad.transaction do
 			items.each do |ad_node|
 
 				# Getting ad properties
-				ad_id = ad_node.xpath(ad_id_xpath).to_s.strip
+				ad_id    = ad_node.xpath(ad_id_xpath).to_s.strip
 				ad_title = ad_node.xpath(ad_title_xpath).to_s.strip
-				ad_url = ad_url_pattern % {:id => ad_id}
+				ad_price = ad_node.xpath(ad_price_xpath).to_f
+				ad_url   = ad_url_pattern % {:id => ad_id}
 
 				# Registering the ad if it's new
 				begin
 					Ad.create(
-						:ad_id => ad_id,
-						:title => ad_title
+						:provider => list_provider,
+						:ad_id    => ad_id,
+						:title    => ad_title,
+						:url      => ad_url,
+						:price    => ad_price,
+						:notified => true
 					)
 					new_list[:items].push({
-						:id => ad_id,
+						:id    => ad_id,
 						:title => ad_title,
-						:url => ad_url
+						:url   => ad_url,
+						:price => ad_price
 					})
 				rescue ActiveRecord::RecordNotUnique
 				end
+
 			end
 
 			# Including new_list if new ads were found
 			new_items.push(new_list) unless new_list[:items].length.zero?
+
 		end
 
 	end
@@ -97,16 +106,19 @@ Ad.transaction do
 		puts "No new ads"
 	else
 		new_items_string = new_items.map { |list|
-			list_items_string = list[:items].map { |item| "- #{item[:title]} - #{item[:url]}" }.join("\n")
-			"#{list[:title]}\n#{list[:url]}\n\n#{list_items_string}\n"
-		}.join("\n")
+			list_items_string = list[:items].map { |item|
+				price_string = item[:price].zero? ? "" : " - R$ #{("%.2f" % item[:price]).gsub('.',',')}"
+				"\t<li><a href=\"#{item[:url]}\">#{item[:title]}</a>#{price_string}</li>"
+			}.join("\n")
+			"<strong>#{list[:title]}</strong> - <a href=\"#{list[:url]}\">lista completa</a><br />\n<ul>\n#{list_items_string}\n</ul>\n"
+		}.join("<br />\n")
 		current_datetime = Time.now.strftime "%d/%m/%Y %H:%M"
 		message = File.read(email['template_email']) % {
 			:current_datetime => current_datetime,
-			:sender_email => email['sender_email'],
-			:recipient_name => email['recipient_name'],
-			:recipient_email => email['recipient_email'],
-			:number_of_ads => new_items_count,
+			:sender_email     => email['sender_email'],
+			:recipient_name   => email['recipient_name'],
+			:recipient_email  => email['recipient_email'],
+			:number_of_ads    => new_items_count,
 			:new_items_string => new_items_string
 		}
 
