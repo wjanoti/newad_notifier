@@ -1,2 +1,2 @@
-newad_notifier.db
+db/*.sqlite3
 *.swp
