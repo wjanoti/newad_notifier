@@ -1,30 +1,33 @@
 #!/usr/bin/env ruby
 
-require 'nokogiri'
-require 'open-uri'
-require 'sqlite3'
-require 'net/smtp'
+require 'rake'
 require 'yaml'
+require 'open-uri'
+require 'net/smtp'
 
-# Laading configuration files
-database = YAML.load_file('config/database.yml')
-email = YAML.load_file('config/email.yml')
+require 'sqlite3'
+require 'active_record'
+require 'nokogiri'
+
+# Laoding configuration files
+database  = YAML.load_file('config/database.yml')
 providers = YAML.load_file('config/providers.yml')
-lists = YAML.load_file('config/lists.yml')
+lists     = YAML.load_file('config/lists.yml')
+email     = YAML.load_file('config/email.yml')
 
-# Configuring the database connection
-begin
-	db = SQLite3::Database.open database['file_name']
-	db.execute "CREATE TABLE IF NOT EXISTS ads (
-		id INTEGER PRIMARY KEY,
-		title TEXT,
-		created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-	)"
-rescue SQLite3::Exception => e
-	puts "Database exception occurred: #{e}"
-ensure
-	exit if !db
-end
+# Establish the database connection
+ActiveRecord::Base.establish_connection(
+	database['production']
+)
+
+# Invoke the rake db:migrate
+Rake.application.init
+Rake.application.load_rakefile
+Rake::Task['db:migrate'].invoke
+
+# Creates the Database references
+Dir.glob( File.join File.dirname(__FILE__),'app','models','**/*.rb' )
+	.sort_by { |file| file.count "/" }.each { |file| require file }
 
 # Checking the lists
 new_items = []
@@ -64,16 +67,17 @@ lists.each do |list|
 			ad_url = ad_url_pattern % {:id => ad_id}
 
 			# Registering the ad if it's new
-			db.execute(
-				"INSERT INTO ads(id, title) SELECT ?, ?	WHERE NOT EXISTS(SELECT 1 FROM ads WHERE id = ?)",
-				[ad_id, ad_title, ad_id]
-			)
-			if db.changes > 0
+			begin
+				Ad.create(
+					:ad_id => ad_id,
+					:title => ad_title
+				)
 				new_list[:items].push({
 					:id => ad_id,
 					:title => ad_title,
 					:url => ad_url
 				})
+			rescue ActiveRecord::RecordNotUnique
 			end
 		end
 
@@ -110,6 +114,3 @@ else
 
 	puts "#{new_items_count} new ads"
 end
-
-# Closing the database
-db.close if db
