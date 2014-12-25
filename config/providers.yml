@@ -10,3 +10,9 @@ olx:
   ad_id_xpath: "@data-item-id"
   ad_title_xpath: "a/@title"
   ad_url_pattern: "http://www.olx.com.br/iid-%{id}"
+mercadolivre:
+  title: "Mercado Livre"
+  ad_node_xpath: "//ol[@id='searchResults']/li[contains(@class,'article')]/div[contains(@class,'rowItem')]"
+  ad_id_xpath: "number(substring-after(@id,'MLB'))"
+  ad_title_xpath: "string(h2[contains(@class,'list-view-item-title')]/a)"
+  ad_url_pattern: "http://produto.mercadolivre.com.br/MLB-%{id}-_JM"
