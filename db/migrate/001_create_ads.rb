@@ -4,7 +4,8 @@ class CreateAds < ActiveRecord::Migration
       t.integer  :ad_id
       t.string   :title
 
-      t.timestamps
+      t.timestamps :null => false
     end
+    add_index :ads, :ad_id, :unique => true
   end
 end
