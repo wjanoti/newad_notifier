@@ -4,10 +4,21 @@ require 'rake'
 require 'yaml'
 require 'open-uri'
 require 'net/smtp'
+require 'optparse'
 
 require 'sqlite3'
 require 'active_record'
 require 'nokogiri'
+
+# Application options
+options = {
+	# Default values
+	:interval => 5 * 60 # 5 minutes
+}
+OptionParser.new do |opts|
+	opts.banner = "Usage: newad_notifier [options]"
+	opts.on('-i', '--interval SECONDS', 'Interval between newad checks') { |value| options[:interval] = value.to_i }
+end.parse!
 
 # Laoding configuration files
 database  = YAML.load_file('config/database.yml')
