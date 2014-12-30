@@ -44,6 +44,8 @@ while true do
 
 	Ad.transaction do
 
+		print "Checking for new items... "
+
 		# Checking the lists
 		new_items = []
 		lists.each do |list|
@@ -116,7 +118,7 @@ while true do
 
 		# Sending an email if any ad was found
 		if new_items_count.zero?
-			puts "No new ads"
+			puts "no new ads found."
 		else
 			new_items_string = new_items.map { |list|
 				list_items_string = list[:items].map { |item|
@@ -139,7 +141,7 @@ while true do
 				smtp.send_message message, email['sender_email'], email['recipient_email']
 			end
 
-			puts "#{new_items_count} new ads"
+			puts "#{new_items_count} new ads found."
 		end
 
 	end
