@@ -5,3 +5,4 @@ gem 'activerecord'
 
 gem 'rspec'
 gem 'nokogiri'
+gem 'liquid'

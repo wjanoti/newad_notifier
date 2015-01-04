@@ -9,6 +9,7 @@ require 'optparse'
 require 'sqlite3'
 require 'active_record'
 require 'nokogiri'
+require 'liquid'
 
 # Application options
 options = {
@@ -71,9 +72,9 @@ while true do
 
 				# Creating container for the current list
 				new_list = {
-					:title => list_title,
-					:url   => list_url,
-					:items => []
+					'title' => list_title,
+					'url'  => list_url,
+					'items' => []
 				}
 
 				# Check each ad found
@@ -95,11 +96,12 @@ while true do
 							:price    => ad_price,
 							:notified => true
 						)
-						new_list[:items].push({
-							:id    => ad_id,
-							:title => ad_title,
-							:url   => ad_url,
-							:price => ad_price
+						new_list['items'].push({
+							'id'    => ad_id,
+							'title' => ad_title,
+							'url'   => ad_url,
+							#Formatting the price here because Liquid templates don't have any default filter for formatting numeric or currency values.
+							'price' => ("%.2f" % ad_price).gsub('.',',')
 						})
 					rescue ActiveRecord::RecordNotUnique
 					end
@@ -107,35 +109,30 @@ while true do
 				end
 
 				# Including new_list if new ads were found
-				new_items.push(new_list) unless new_list[:items].length.zero?
+				new_items.push(new_list) unless new_list['items'].length.zero?
 
 			end
 
 		end
 
 		# Getting the total number of new ads found
-		new_items_count = new_items.map { |list| list[:items].length }.inject(:+).to_i
+		new_items_count = new_items.map { |list| list['items'].length }.inject(:+).to_i
 
 		# Sending an email if any ad was found
 		if new_items_count.zero?
 			puts "no new ads found."
 		else
-			new_items_string = new_items.map { |list|
-				list_items_string = list[:items].map { |item|
-					price_string = item[:price].zero? ? "" : " - R$ #{("%.2f" % item[:price]).gsub('.',',')}"
-					"\t<li><a href=\"#{item[:url]}\">#{item[:title]}</a>#{price_string}</li>"
-				}.join("\n")
-				"<strong>#{list[:title]}</strong> - <a href=\"#{list[:url]}\">lista completa</a><br />\n<ul>\n#{list_items_string}\n</ul>\n"
-			}.join("<br />\n")
 			current_datetime = Time.now.strftime "%d/%m/%Y %H:%M"
-			message = File.read(email['template_email']) % {
-				:current_datetime => current_datetime,
-				:sender_email     => email['sender_email'],
-				:recipient_name   => email['recipient_name'],
-				:recipient_email  => email['recipient_email'],
-				:number_of_ads    => new_items_count,
-				:new_items_string => new_items_string
+			message_data = {
+				'current_datetime' => current_datetime,
+				'sender_email' => email['sender_email'],
+				'recipient_name' => email['recipient_name'],
+				'recipient_email' => email['recipient_email'],
+				'number_of_ads' => new_items_count,
+				'new_items_list' => new_items
 			}
+
+			message = Liquid::Template.parse(File.read(email['template_email'])).render(message_data)
 
 			Net::SMTP.start('localhost') do |smtp|
 				smtp.send_message message, email['sender_email'], email['recipient_email']
