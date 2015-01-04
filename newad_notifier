@@ -129,17 +129,11 @@ while true do
 		if new_items_count.zero?
 			puts "no new ads found."
 		else
-			current_datetime = Time.now.strftime "%d/%m/%Y %H:%M"
-			message_data = {
-				'current_datetime' => current_datetime,
-				'sender_email' => email['sender_email'],
-				'recipient_name' => email['recipient_name'],
-				'recipient_email' => email['recipient_email'],
+			message = Liquid::Template.parse(File.read(email['template_email'])).render({
+				'email_settings' => email,
 				'number_of_ads' => new_items_count,
 				'new_items_list' => new_items
-			}
-
-			message = Liquid::Template.parse(File.read(email['template_email'])).render(message_data)
+			})
 
 			Net::SMTP.start('localhost') do |smtp|
 				smtp.send_message message, email['sender_email'], email['recipient_email']
