@@ -11,7 +11,10 @@ There are {{ number_of_ads }} new ads on the lists you are watching:<br />
 	<ul>
 	{% for item in list.items %}
 		<li>
-			<a href="{{ item.url }}">{{ item.title }}</a> - R$ {{ item.price }}
+			<a href="{{ item.url }}">{{ item.title }}</a>
+			{% if item.price %}
+				- R$ {{ item.price }}
+			{% endif %}
 		</li>
 	{% endfor %}
 	</ul>

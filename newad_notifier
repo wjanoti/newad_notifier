@@ -96,13 +96,20 @@ while true do
 							:price    => ad_price,
 							:notified => true
 						)
-						new_list['items'].push({
+
+						new_item = {
 							'id'    => ad_id,
 							'title' => ad_title,
 							'url'   => ad_url,
+						}
+
+						if !ad_price.zero?
 							#Formatting the price here because Liquid templates don't have any default filter for formatting numeric or currency values.
-							'price' => ("%.2f" % ad_price).gsub('.',',')
-						})
+							new_item['price'] = ("%.2f" % ad_price).gsub('.',',')
+						end
+
+						new_list['items'].push(new_item)
+
 					rescue ActiveRecord::RecordNotUnique
 					end
 
